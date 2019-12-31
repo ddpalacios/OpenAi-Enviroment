@@ -1,6 +1,10 @@
 # OpenAi-Enviroment
 Reinforcement Learning 
 
+!!Check out repository for Source code from PactPublishing!!
+
+``` https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On ```
+           
 **Our Enviroment**
 Tools you will be using:
 
