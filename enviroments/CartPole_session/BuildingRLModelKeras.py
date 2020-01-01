@@ -1,6 +1,7 @@
 import keras
 from keras import optimizers, Sequential
 from keras.layers import Dense
+import numpy as np
 '''
 Cross-entropy on CartPole using Keras
 
@@ -16,3 +17,10 @@ class Model:
         self.model.compile(optimizer='adam',
                            loss='sparse_categorical_crossentropy',
                            metrics=['accuracy'])
+
+    def select_action(self, observations): # Just predicts an action
+        action_probabilities = self.model.predict(np.asarray([observations]), verbose=0)
+        return np.random.choice(len(action_probabilities[0]), p=action_probabilities[0]) # Random Sampling
+
+    def train(self, train_observations, train_actions):
+        self.model.fit(train_observations, train_actions, epochs=30, verbose=0)
