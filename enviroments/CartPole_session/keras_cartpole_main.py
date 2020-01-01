@@ -16,18 +16,11 @@ if __name__ == '__main__':
     while True:
         env.render()
         action = env.action_space.sample()
-        # if action:
-        #     print("Going right")
-        # else:
-        #     print("Going left")
-
         obs, reward, done, _ = env.step(action)  # Observation from action
         steps +=1
         reward_status = Episode(reward=reward, steps=steps)
         status = EpisodeStep(observation=obs, action=action)
         print("{}{}\n".format(status, reward_status))
-        #
-        # if done:
-        #     env.close()
-        #
-        #     break
+        if done:
+            env.close()
+            break
