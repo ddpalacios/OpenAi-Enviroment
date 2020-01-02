@@ -8,15 +8,13 @@ Cross-entropy on CartPole using Keras
 Our model is a one-hidden-layer neural network
 '''
 
-
 class Model:
-    def __init__(self, hidden_size, batches, actions):
+    def __init__(self, observation_size, hidden_size,  actions_n):
         self.model = Sequential()
-        self.model.add(Dense(hidden_size, activation='relu', input_dim=batches))
-        self.model.add(Dense(actions, activation='softmax'))
+        self.model.add(Dense(hidden_size, activation='relu', input_dim=observation_size))
+        self.model.add(Dense(actions_n, activation='softmax'))
         self.model.compile(optimizer='adam',
-                           loss='sparse_categorical_crossentropy',
-                           metrics=['accuracy'])
+                           loss='sparse_categorical_crossentropy')
 
     def select_action(self, observations): # Just predicts an action
         action_probabilities = self.model.predict(np.asarray([observations]), verbose=0)
