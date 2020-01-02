@@ -93,7 +93,7 @@ hidden_size = 64
 
 
 if __name__ == '__main__':
-    env = gym.make('CartPole-v0') # Selecting our enviroment
+    env = gym.make('FrozenLake-v0') # Selecting our enviroment
     observation = env.reset()  # Starting observation
 
     # Initilizing model, observation and action size

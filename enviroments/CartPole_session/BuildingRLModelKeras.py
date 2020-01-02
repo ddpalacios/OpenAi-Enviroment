@@ -20,8 +20,9 @@ class Model:
                            metrics=['acc'])
 
     def select_action(self, observations):  # Just predicts an action
-        action_probabilities = self.model.predict(np.asarray([observations]), verbose=0)
-        return np.random.choice(len(action_probabilities[0]), p=action_probabilities[0])  # Random Sampling
+        from time import sleep
+        action_probabilities = self.model.predict(np.asarray([observations]))
+        return np.random.choice(len(action_probabilities), p=action_probabilities[0])  # Random Sampling
 
     def train(self, train_observations, train_actions):
         self.model.fit(train_observations, train_actions, epochs=50, verbose=0)
