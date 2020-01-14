@@ -4,15 +4,17 @@ from PIL import Image
 import cv2
 from Agent import Blob
 import random
-
+from time import sleep
 class Environment:
-    def __init__(self, title="Blob world"):
+    def __init__(self,window_size,step_size, world_size=10,title="Blob world"):
         self.actions = [0,1,2,3,4,5,6,7,8]
+        self.window_size = window_size
+        self.MAX_AMOUNT_OF_STEPS = step_size
         self.title = title
-        self.SIZE = 10
+        self.SIZE = world_size
         self.RETURN_IMAGES = True
-        self.MOVE_PENALTY = 1
-        self.ENEMY_PENALTY = 300
+        self.MOVE_PENALTY = -1
+        self.ENEMY_PENALTY = -300
         self.FOOD_REWARD = 25
         self.OBSERVATION_SPACE_VALUES = (self.SIZE, self.SIZE, 3)  # 4
         self.ACTION_SPACE_SIZE = 9
@@ -30,25 +32,32 @@ class Environment:
            
     def render(self):
         img = self.get_image()
-        img = img.resize((300,300))
-        cv2.imshow("Image", np.array(img))
+        img = img.resize((self.window_size,self.window_size))
+        cv2.imshow(self.title, np.array(img))
         cv2.waitKey(1)
         
     def step(self, action):
+        reward = 0.0
+        done = False
         self.episode_step +=1
         self.player.action(action)
-        if self.RETURN_IMAGES:
-            new_observation=np.array(self.get_image())
-        else:
-            new_observation = (self.player - self.food) + (self.player - self.enemy)
+        new_observation=np.array(self.get_image())
+      
         if self.player == self.enemy:
-            reward = -self.ENEMY_PENALTY
+            reward += self.ENEMY_PENALTY
+            print("HIT ENEMY\nReward:",reward)
+            sleep(2)
         elif self.player == self.food:
-            reward = self.FOOD_REWARD
+            reward += self.FOOD_REWARD
+            print("OBTAINED FOOD\nReward:",reward)
+            sleep(2)
+            self.food.x = np.random.randint(0, self.SIZE)
+            self.food.y = np.random.randint(0, self.SIZE)
         else:
-            reward = -self.MOVE_PENALTY
-        done = False
-        if reward == self.FOOD_REWARD or reward == -self.ENEMY_PENALTY or self.episode_step > 20:
+            reward += self.MOVE_PENALTY
+       
+
+        if reward == self.ENEMY_PENALTY or self.episode_step > self.MAX_AMOUNT_OF_STEPS:
             done = True
         return new_observation, reward, done
     def get_image(self):
