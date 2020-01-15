@@ -21,8 +21,4 @@ class model:
         ADAM = adam(lr=0.01)
         self.model.compile(optimizer=ADAM, loss='mean_squared_error')
 
-    def predict(self):
-        pass
-
-    def train(self):
-        pass
+   

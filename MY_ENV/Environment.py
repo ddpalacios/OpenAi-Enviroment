@@ -5,12 +5,14 @@ import cv2
 from Agent import Blob
 import random
 from time import sleep
+from Buffer import ExperienceBuffer
 class Environment:
-    def __init__(self,window_size,step_size, world_size=10,title="Blob world"):
+    def __init__(self,window_size,step_size, world_size=10,REPLAY_SIZE=10_000,title="Blob world"):
         self.actions = [0,1,2,3,4,5,6,7,8]
         self.window_size = window_size
         self.MAX_AMOUNT_OF_STEPS = step_size
         self.title = title
+        self.exp_buffer = ExperienceBuffer(REPLAY_SIZE)
         self.SIZE = world_size
         self.RETURN_IMAGES = True
         self.MOVE_PENALTY = -1
@@ -26,16 +28,39 @@ class Environment:
             2: (0, 255, 0),
             3: (0, 0, 255)}
 
+    def _reset(self):
+        self.state = self.reset()
+        self.total_reward = 0.0
+
+    def play_step(self, model, epsilon=0.0):
+        done_reward = None
+        if np.random.random() < epsilon:
+            action = self.action_sample()
+        else:
+            state = self.state
+            q_val = model.predict(state)
+            action = int(max(q_val))
+
+
+        new_state, reward, is_done = self.step(action)
+        self.total_reward +=reward
+        new_state = new_state
+        exp = Experience(self.state, action, reward, is_done, new_stat)
+        self.exp_buffer.append(exp)
+        self.state = new_state
+        if is_done:
+            done_reward = self.total_reward
+            self._reset()
+        return done_reward
+
     def action_sample(self):
         action = random.choice(self.actions)
         return action
-           
     def render(self):
         img = self.get_image()
         img = img.resize((self.window_size,self.window_size))
         cv2.imshow(self.title, np.array(img))
         cv2.waitKey(1)
-        
     def step(self, action):
         reward = 0.0
         done = False
