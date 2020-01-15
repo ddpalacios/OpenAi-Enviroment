@@ -5,9 +5,9 @@ from Agent import Blob
 import random
 import collections
 from Buffer import ExperienceBuffer
-from time import sleep
-Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
 
+Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
+SPEED = .05
 
 class Environment:
     def __init__(self, window_size, step_size, world_size=10, REPLAY_SIZE=10_000, title="Blob world"):
@@ -52,6 +52,15 @@ class Environment:
         new_state, reward, is_done = self.step(action)  # Perform chosen action and return its new state, its reward, and our boolean
         self.total_reward += reward  # Add the given reward to our total reward
         new_state = new_state
+        print(
+            "\n\nBATCH Being appended STEP# {}:\nOriginal state (shape): {}\nAction: {}\nReward given: {}\nis done?(1/0): {}\nNew State: {}\n".format(self.episode_step,
+                self.state.shape, action, reward,
+                is_done, new_state.shape))
+        print("REPLAY BUFFER LENGTH: {}".format(self.exp_buffer._len_()))
+        if self.exp_buffer._len_() >= 10_000:
+            print("\nNo longer appending expierience...\n...Ready to train data with current buffer...")
+
+        print("\n\n----------------")
         exp = Experience(self.state, action, reward, is_done, new_state)  # Obtain our (s,a,r, done ,s')
         self.exp_buffer.append(exp)  # Append this tuple into our replay buffer. this will be used for our training data
         self.state = new_state  # Then we will update the new state with its current state
@@ -90,11 +99,9 @@ class Environment:
         if self.player == self.enemy: # if the player hits the enemy
             reward = self.ENEMY_PENALTY # add the penality to our current reward
             print("HIT ENEMY\nReward:", reward)
-            # sleep(.05)
         elif self.player == self.food:
             reward = self.FOOD_REWARD
             print("OBTAINED FOOD\nReward:", reward)
-            # sleep(.05)
             self.food.x = np.random.randint(0, self.SIZE)
             self.food.y = np.random.randint(0, self.SIZE)
         else:
