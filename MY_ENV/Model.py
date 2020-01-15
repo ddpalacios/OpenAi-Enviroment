@@ -7,11 +7,11 @@ import sys
 from Buffer import ExperienceBuffer
 
 class model:
-    def __init__(self, input, input_n, hidden_n, output_n):
+    def __init__(self, input_n, hidden_n, output_n):
         self.model = Sequential()
-        self.model.add(Conv2D(input_n, kernel_size=(3, 3), activation='relu', input_shape=input.shape))
+        self.model.add(Conv2D(input_n, kernel_size=(1, 1), activation='relu', input_shape=(1, 3,50,50)))
         self.model.add(MaxPool2D(pool_size=(2, 2)))
-        self.model.add(Conv2D(hidden_n, activation='relu'))
+        self.model.add(Conv2D(hidden_n, kernel_size=(3, 3), activation='relu'))
         self.model.add(MaxPool2D(pool_size=(2, 2)))
 
         self.model.add(Flatten())
