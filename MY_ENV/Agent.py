@@ -1,8 +1,6 @@
 import numpy as np
 from time import sleep
 
-SPEED = .0000001
-
 
 class Blob:
     def __init__(self, size):
@@ -25,33 +23,33 @@ class Blob:
         '''
         if choice == 0:
             self.move(x=1, y=1)
-            sleep(SPEED)
+
         elif choice == 1:
             self.move(x=-1, y=-1)
-            sleep(SPEED)
+
         elif choice == 2:
             self.move(x=-1, y=1)
-            sleep(SPEED)
+
         elif choice == 3:
             self.move(x=1, y=-1)
-            sleep(SPEED)
+
         elif choice == 4:
             self.move(x=1, y=0)
-            sleep(SPEED)
+
         elif choice == 5:
             self.move(x=-1, y=0)
-            sleep(SPEED)
+
 
         elif choice == 6:
             self.move(x=0, y=1)
-            sleep(SPEED)
+
         elif choice == 7:
             self.move(x=0, y=-1)
-            sleep(SPEED)
+
 
         elif choice == 8:
             self.move(x=0, y=0)
-            sleep(SPEED)
+
 
     def move(self, x=False, y=False):
 
