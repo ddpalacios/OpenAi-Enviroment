@@ -1,6 +1,8 @@
 import numpy as np
-import random
-  
+from time import sleep
+
+SPEED = .0000001
+
 
 class Blob:
     def __init__(self, size):
@@ -12,7 +14,7 @@ class Blob:
         return f"Blob ({self.x}, {self.y})"
 
     def __sub__(self, other):
-        return (self.x-other.x, self.y-other.y)
+        return (self.x - other.x, self.y - other.y)
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
@@ -23,25 +25,33 @@ class Blob:
         '''
         if choice == 0:
             self.move(x=1, y=1)
+            sleep(SPEED)
         elif choice == 1:
             self.move(x=-1, y=-1)
+            sleep(SPEED)
         elif choice == 2:
             self.move(x=-1, y=1)
+            sleep(SPEED)
         elif choice == 3:
             self.move(x=1, y=-1)
-
+            sleep(SPEED)
         elif choice == 4:
             self.move(x=1, y=0)
+            sleep(SPEED)
         elif choice == 5:
             self.move(x=-1, y=0)
+            sleep(SPEED)
 
         elif choice == 6:
             self.move(x=0, y=1)
+            sleep(SPEED)
         elif choice == 7:
             self.move(x=0, y=-1)
+            sleep(SPEED)
 
         elif choice == 8:
             self.move(x=0, y=0)
+            sleep(SPEED)
 
     def move(self, x=False, y=False):
 
@@ -60,9 +70,9 @@ class Blob:
         # If we are out of bounds, fix!
         if self.x < 0:
             self.x = 0
-        elif self.x > self.size-1:
-            self.x = self.size-1
+        elif self.x > self.size - 1:
+            self.x = self.size - 1
         if self.y < 0:
             self.y = 0
-        elif self.y > self.size-1:
-            self.y = self.size-1
+        elif self.y > self.size - 1:
+            self.y = self.size - 1
