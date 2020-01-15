@@ -2,6 +2,7 @@ from Environment import Environment
 from Model import model
 import sys
 from time import sleep
+
 EPSILON_FINAL = 0.02
 total_rewards = []
 EPSILON_START = 1.0
@@ -12,6 +13,8 @@ REPLAY_SIZE = 10_000
 REPLAY_START_SIZE = 10_000
 LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 1_000
+
+
 ###################
 # Model Layer Param (FOR CONV2D)
 ###################
@@ -29,13 +32,14 @@ def calc_loss(batch, model, target_model):
 
 
 if __name__ == '__main__':
-    episode =0
+    episode = 0
     frame_idx = 0
     env = Environment(window_size=int(sys.argv[1]), step_size=int(sys.argv[2]), world_size=int(sys.argv[3]))
     show = int(sys.argv[4])
     state = env.reset()
-    forward_prop = model(state.shape, INPUT_N, HIDDEN_N, 9) # Forward propagation. Uses current weights and performs our linear algebra
-    back_prop = model(state.shape, INPUT_N, HIDDEN_N, 9) # For training (Calculates gradients with backpropagation)
+    forward_prop = model(state.shape, INPUT_N, HIDDEN_N,
+                         9)  # Forward propagation. Uses current weights and performs our linear algebra
+    back_prop = model(state.shape, INPUT_N, HIDDEN_N, 9)  # For training (Calculates gradients with backpropagation)
     while True:
         frame_idx += 1
         if show:
@@ -46,10 +50,11 @@ if __name__ == '__main__':
 
         if reward is not None:
             total_rewards.append(reward)
+            batch = env.exp_buffer.sample(BATCH_SIZE)
+
             if is_done:
-                episode+=1
-                print("\n... EPSILON DECAY", epsilon)
-                # sleep(.5)
+                episode += 1
+                print("\n... EPISODE IS DONE")
                 print("Rewards from episode #{}:\n{}\n".format(episode, total_rewards))
                 env.reset()
             # calc_loss(batch, model, tgt_model)
