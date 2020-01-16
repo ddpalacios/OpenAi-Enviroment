@@ -7,7 +7,7 @@ import collections
 from Buffer import ExperienceBuffer
 
 Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
-SPEED = .05
+
 
 class Environment:
     def __init__(self, window_size, step_size, world_size=10, REPLAY_SIZE=10_000, title="Blob world"):
@@ -18,6 +18,7 @@ class Environment:
         self.window_size = window_size
         self.MAX_AMOUNT_OF_STEPS = step_size
         self.title = title
+        self.REPLAY_SIZE = REPLAY_SIZE
         self.exp_buffer = ExperienceBuffer(REPLAY_SIZE)
         self.SIZE = world_size
         self.RETURN_IMAGES = True
@@ -39,49 +40,55 @@ class Environment:
         # self.state = self.reset()
         self.total_reward = 0.0
 
-    def play_step(self, model, epsilon=0.0):
+    def play_step(self, model, epsilon=0.0, view_live_progress=False):
         done_reward = None
         if np.random.random() < epsilon:  # Epsilon Decay --> Exploration vs Exploitation Dilemma
             action = self.action_sample()  # Choosing a random action n% of the time
         else:
             state = self.state  # Otherwise, get its current state
-            print("... Forward prop action calculating...")
+            # print("... Forward prop action calculating...")
             q_val = model.Predict(state)  # And using models current weights, perform your forward prop
             action = np.argmax(q_val)  # Then retrieve the index with its maximum value
 
-        new_state, reward, is_done = self.step(action)  # Perform chosen action and return its new state, its reward, and our boolean
+        new_state, reward, is_done = self.step(
+            action)  # Perform chosen action and return its new state, its reward, and our boolean
         self.total_reward += reward  # Add the given reward to our total reward
         new_state = new_state
 
-        # Live Progress
-        #######################################
-        print(
-            "\n\nBATCH Being appended STEP# {}:\n"
-            "Original state (shape): {}\n"
-            "Action: {}\nReward given: {}\n"
-            "is done?: {}\nNew State: {}\n"\
-                .format(self.episode_step,
-                        self.state.shape, action, reward,
-                        is_done, new_state.shape))
-
-        print("REPLAY BUFFER LENGTH: {}".format(self.exp_buffer._len_()))
-        if self.exp_buffer._len_() >= 10_000:
-            print("\nNo longer appending expierience...\n...Ready to train data with current buffer...")
-        print("\n\n----------------")
-        #########################################
+        if view_live_progress:
+            self.track_progress(action, reward, is_done, new_state, epsilon)
 
         exp = Experience(self.state, action, reward, is_done, new_state)  # Obtain our (s,a,r, done ,s')
         self.exp_buffer.append(exp)  # Append this tuple into our replay buffer. this will be used for our training data
         self.state = new_state  # Then we will update the new state with its current state
         if is_done:  # If our episode is done
             done_reward = self.total_reward  # Obtain the finished rewards that was obtained during the episode
-            self._reset() # Reset our environment. Reset total rewards and state
+            self._reset()  # Reset our environment. Reset total rewards and state
 
-        return done_reward, is_done # Finally, we will return our reward back to our main file
+        return done_reward, is_done  # Finally, we will return our reward back to our main file
 
     def action_sample(self):
         action = random.choice(self.actions)
         return action
+
+    def track_progress(self, action, reward, is_done, new_state, epsilon):
+        # Live Progress
+        #######################################
+        print(
+            "\n\nEXPERIENCE BUFFER:\n"
+            "STEP# {}:\n"
+            "EPSILON DECAY: {}\n"
+            "Original state (shape): {}\n"
+            "Action: {}\nReward given: {}\n"
+            "is done?: {}\nNew State: {}\n" \
+                .format(self.episode_step, epsilon,
+                        self.state.shape, action, reward,
+                        is_done, new_state.shape))
+        print("REPLAY BUFFER LENGTH: {}".format(self.exp_buffer._len_()))
+        if self.exp_buffer._len_() >= 10_000:
+            print("\nNo longer appending expierience...\n...Ready to train data with current buffer...")
+        print("\n\n----------------")
+        #########################################
 
     def render(self):
         img = self.get_image()
@@ -97,16 +104,17 @@ class Environment:
         This function will allow us to interact with our enviroment with
         its indicated chosen action
         '''
-        done = False # Our flag to indicate when an episode is over
-        self.episode_step += 1 # Amount of steps taken in our episode
-        print("Steps taken:",self.episode_step)
+        done = False  # Our flag to indicate when an episode is over
+        self.episode_step += 1  # Amount of steps taken in our episode
+        # print("Steps taken:", self.episode_step)
 
-        self.player.action(action) # Perform that step to our agents class (Dont worry about how this works. \
-                                    # Just know it will perform that specified action updating (x,y) cord)
+        self.player.action(action)  # Perform that step to our agents class (Dont worry about how this works. \
+        # Just know it will perform that specified action updating (x,y) cord)
 
-        new_observation = np.array(self.get_image()) # From the current coordinates, retrieve the RGB image for our Conv2D model
-        if self.player == self.enemy: # if the player hits the enemy
-            reward = self.ENEMY_PENALTY # add the penality to our current reward
+        new_observation = np.array(
+            self.get_image())  # From the current coordinates, retrieve the RGB image for our Conv2D model
+        if self.player == self.enemy:  # if the player hits the enemy
+            reward = self.ENEMY_PENALTY  # add the penality to our current reward
             print("HIT ENEMY\nReward:", reward)
         elif self.player == self.food:
             reward = self.FOOD_REWARD
@@ -119,7 +127,7 @@ class Environment:
         if reward == self.FOOD_REWARD or reward == self.ENEMY_PENALTY or self.episode_step > self.MAX_AMOUNT_OF_STEPS:
             done = True
 
-        return new_observation,reward, done
+        return new_observation, reward, done
 
     def get_image(self):
         env = np.zeros((self.SIZE, self.SIZE, 3), dtype=np.uint8)  # starts an rbg of our size

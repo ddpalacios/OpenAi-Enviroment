@@ -19,7 +19,9 @@ class model:
         self.model.compile(optimizer=Adam(lr=0.001), loss='mean_squared_error')
 
     def Predict(self, state):
-        # print(np.array(state).reshape(-1, *state.shape))
         predicted = self.model.predict(np.array(state).reshape(-1, *state.shape) / 255)[0]
-        predicted = np.argmax(predicted)  # Returns the INDEX of the maximum value passed in array
-        return predicted
+        return np.array(predicted)
+
+    def Train(self, X_train, env):
+        if env._len_ < env.REPLAY_SIZE:
+            return
