@@ -52,15 +52,24 @@ class Environment:
         new_state, reward, is_done = self.step(action)  # Perform chosen action and return its new state, its reward, and our boolean
         self.total_reward += reward  # Add the given reward to our total reward
         new_state = new_state
+
+        # Live Progress
+        #######################################
         print(
-            "\n\nBATCH Being appended STEP# {}:\nOriginal state (shape): {}\nAction: {}\nReward given: {}\nis done?(1/0): {}\nNew State: {}\n".format(self.episode_step,
-                self.state.shape, action, reward,
-                is_done, new_state.shape))
+            "\n\nBATCH Being appended STEP# {}:\n"
+            "Original state (shape): {}\n"
+            "Action: {}\nReward given: {}\n"
+            "is done?: {}\nNew State: {}\n"\
+                .format(self.episode_step,
+                        self.state.shape, action, reward,
+                        is_done, new_state.shape))
+
         print("REPLAY BUFFER LENGTH: {}".format(self.exp_buffer._len_()))
         if self.exp_buffer._len_() >= 10_000:
             print("\nNo longer appending expierience...\n...Ready to train data with current buffer...")
-
         print("\n\n----------------")
+        #########################################
+
         exp = Experience(self.state, action, reward, is_done, new_state)  # Obtain our (s,a,r, done ,s')
         self.exp_buffer.append(exp)  # Append this tuple into our replay buffer. this will be used for our training data
         self.state = new_state  # Then we will update the new state with its current state
