@@ -3,7 +3,7 @@ from Model import model
 import sys
 import numpy as np
 from time import sleep
-
+AGGREGATE_STATS_EVERY = 50
 EPSILON_FINAL = 0.02
 total_rewards = []
 EPSILON_START = 1.0
@@ -66,13 +66,20 @@ if __name__ == '__main__':
         if show:
             env.render()
         epsilon = max(EPSILON_FINAL, EPSILON_START - frame_idx/EPSILON_DECAY_LAST_FRAME)
-        reward, is_done = env.play_step(forward_prop, epsilon, view_live_progress=True)
+        reward, is_done = env.play_step(forward_prop, epsilon, view_live_progress=False)
         calc_loss(forward_prop, back_prop, env, is_done)
         if is_done:
+            episode+=1
             env.reset()
 
         if reward is not None:
             total_rewards.append(reward)
+            if not episode % AGGREGATE_STATS_EVERY or episode == 1:
+                average_reward = sum(total_rewards[-AGGREGATE_STATS_EVERY:])/len(total_rewards[-AGGREGATE_STATS_EVERY:])
+                min_reward = min(total_rewards[-AGGREGATE_STATS_EVERY:])
+                max_reward = max(total_rewards[-AGGREGATE_STATS_EVERY:])
+                print("Min Reward: {}\nMax Reward: {}\nAverage Reward: {}".format(min_reward, max_reward, average_reward))
+
 
 
 
