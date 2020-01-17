@@ -66,7 +66,7 @@ if __name__ == '__main__':
         if show:
             env.render()
         epsilon = max(EPSILON_FINAL, EPSILON_START - frame_idx/EPSILON_DECAY_LAST_FRAME)
-        reward, is_done = env.play_step(forward_prop, epsilon, view_live_progress=False)
+        reward, is_done = env.play_step(forward_prop, epsilon, view_live_progress=True)
         calc_loss(forward_prop, back_prop, env, is_done)
         if is_done:
             env.reset()

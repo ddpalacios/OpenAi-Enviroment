@@ -35,7 +35,7 @@ class model:
             self.target_update_counter +=1
         if self.target_update_counter > UPDATE_TARGET_EVERY:
             print("SETTING WEIGHTS...")
-            tgt_model.set_weights(self.model.get_weights())
+            self.model.set_weights(self.model.get_weights())
             self.target_update_counter = 0
 
 

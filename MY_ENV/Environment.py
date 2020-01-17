@@ -24,6 +24,7 @@ class Environment:
         self.RETURN_IMAGES = True
         self.MOVE_PENALTY = -1
         self.ENEMY_PENALTY = -300
+        self.NO_PROGRESS_PENALITY = -100
         self.FOOD_REWARD = 300
         self.OBSERVATION_SPACE_VALUES = (self.SIZE, self.SIZE, 3)  # 4
         self.ACTION_SPACE_SIZE = 9
@@ -118,8 +119,10 @@ class Environment:
         elif self.player == self.food:
             reward = self.FOOD_REWARD
             print("OBTAINED FOOD\nReward:", reward)
-            self.food.x = np.random.randint(0, self.SIZE)
-            self.food.y = np.random.randint(0, self.SIZE)
+            # self.food.x = np.random.randint(0, self.SIZE)
+            # self.food.y = np.random.randint(0, self.SIZE)
+        elif self.episode_step >= self.MAX_AMOUNT_OF_STEPS:
+            reward = self.NO_PROGRESS_PENALITY
         else:
             reward = self.MOVE_PENALTY
 
