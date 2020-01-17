@@ -9,12 +9,12 @@ total_rewards = []
 EPSILON_START = 1.0
 EPSILON_DECAY_LAST_FRAME = 10 ** 5
 GAMMA = .99
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 REPLAY_SIZE = 10_000
 REPLAY_START_SIZE = 10_000
 LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 1_000
-ACTION_SPACE = 8
+ACTION_SPACE = 9
 ###################
 # Model Layer Param
 # (FOR CONV2D)
@@ -24,31 +24,33 @@ HIDDEN_N = 128
 ###################
 
 
-def calc_loss(batch, forward_prop, back_prop, env):
+def calc_loss(model, target_model, env, done):
+    if env.exp_buffer._len_() < REPLAY_SIZE:
+        return
+    batch = env.exp_buffer.sample(BATCH_SIZE)
+    current_states, actions, reward, dones, next_states = batch
+    current_qs_list = forward_prop.t_pred(current_states)
+    future_qs_list = target_model.t_pred(next_states)
     X_train = []
     y_train = []
-    current_states, actions, reward, dones, next_states = batch
+
     for idx, (current_state, action, reward, done, next_state) in enumerate(zip(current_states,
                                                                                 actions,
                                                                                 reward,
                                                                                 dones,
                                                                                 next_states)):
-        state_action_values = forward_prop.Predict(current_state)
-        future_q_list = forward_prop.Predict(next_state)
-        #
-        # if not done:
-        #     max_future_q = np.max(future_q_list)
-        #     expected_state_action_values = reward + GAMMA * max_future_q
-        # else:
-        #     expected_state_action_values = reward  # Immediate reward
-        #
-        # # Update Q value for a given state
-        # current_qs = current_states[idx]
-        #
-        # X_train.append(current_state)
-        # y_train.append(current_qs)
+        if not done:
+            max_future_q = np.max(future_qs_list[idx])
+            new_q = reward + GAMMA * max_future_q
+        else:
+            new_q = reward
 
-    # back_prop.Train(expected_state_action_values, env)
+        current_qs = current_qs_list[idx]
+        current_qs[action] = new_q
+        X_train.append(current_state)
+        y_train.append(current_qs)
+    model.Train(np.array(X_train), np.array(y_train), BATCH_SIZE, target_model, done)
+
 
 
 if __name__ == '__main__':
@@ -65,13 +67,14 @@ if __name__ == '__main__':
             env.render()
         epsilon = max(EPSILON_FINAL, EPSILON_START - frame_idx/EPSILON_DECAY_LAST_FRAME)
         reward, is_done = env.play_step(forward_prop, epsilon, view_live_progress=False)
+        calc_loss(forward_prop, back_prop, env, is_done)
         if is_done:
             env.reset()
 
         if reward is not None:
             total_rewards.append(reward)
-            batch = env.exp_buffer.sample(BATCH_SIZE)
 
 
 
-            # calc_loss(batch, forward_prop, back_prop, env)
+
+

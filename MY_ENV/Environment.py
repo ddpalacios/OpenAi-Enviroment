@@ -37,7 +37,6 @@ class Environment:
         self.state = self.reset()
 
     def _reset(self):
-        # self.state = self.reset()
         self.total_reward = 0.0
 
     def play_step(self, model, epsilon=0.0, view_live_progress=False):
