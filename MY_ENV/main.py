@@ -14,7 +14,7 @@ REPLAY_SIZE = 10_000
 REPLAY_START_SIZE = 10_000
 LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 1_000
-
+ACTION_SPACE = 8
 ###################
 # Model Layer Param
 # (FOR CONV2D)
@@ -57,23 +57,21 @@ if __name__ == '__main__':
     env = Environment(window_size=int(sys.argv[1]), step_size=int(sys.argv[2]), world_size=int(sys.argv[3]))
     show = int(sys.argv[4])
     state = env.reset()
-    forward_prop = model(state.shape, INPUT_N, HIDDEN_N,
-                         9)  # Forward propagation. Uses current weights and performs our linear algebra
-    back_prop = model(state.shape, INPUT_N, HIDDEN_N, 9)  # For training (Calculates gradients with backpropagation)
+    forward_prop = model(state.shape, INPUT_N, HIDDEN_N, ACTION_SPACE)  # Forward propagation. Uses current weights and performs our linear algebra
+    back_prop = model(state.shape, INPUT_N, HIDDEN_N, ACTION_SPACE)  # For training (Calculates gradients with backpropagation)
     while True:
         frame_idx += 1
         if show:
             env.render()
-        epsilon = 0
+        epsilon = max(EPSILON_FINAL, EPSILON_START - frame_idx/EPSILON_DECAY_LAST_FRAME)
         reward, is_done = env.play_step(forward_prop, epsilon, view_live_progress=False)
+        if is_done:
+            env.reset()
 
         if reward is not None:
             total_rewards.append(reward)
             batch = env.exp_buffer.sample(BATCH_SIZE)
 
-            if is_done:
-                episode += 1
-                print("\n... EPISODE IS DONE")
-                env.reset()
 
-            calc_loss(batch, forward_prop, back_prop, env)
+
+            # calc_loss(batch, forward_prop, back_prop, env)
