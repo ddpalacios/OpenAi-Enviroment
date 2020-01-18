@@ -47,12 +47,11 @@ class Environment:
         else:
             state = self.state  # Otherwise, get its current state
             # print("... Forward prop action calculating...")
-            q_val = model.Predict(state)  # And using models current weights, perform your forward prop
+            q_val = model.predict(np.array(state).reshape(-1, *state.shape) / 255)[0]  # And using models current weights, perform your forward prop
             action = np.argmax(q_val)  # Then retrieve the index with its maximum value
 
         new_state, reward, is_done = self.step(action)  # Perform chosen action and return its new state, its reward, and our boolean
         self.total_reward += reward  # Add the given reward to our total reward
-        new_state = new_state
 
         if view_live_progress:
             self.track_progress(action, reward, is_done, new_state, epsilon)

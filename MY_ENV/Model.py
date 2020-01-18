@@ -16,7 +16,7 @@ class model:
         self.model.add(Dropout(.2))
 
         self.model.add(Flatten())
-        self.model.add(Dense(64))
+        self.model.add(Dense(512, activation= 'relu'))
         self.model.add(Dense(output_n, activation='linear'))
         self.model.compile(optimizer=Adam(lr=1e-4), loss='mse')
 
@@ -28,13 +28,14 @@ class model:
         predicted = self.model.predict(np.array(state).reshape(-1, *state.shape) / 255)[0]
         return np.array(predicted)
 
-    def Train(self, X_train, y_train, BATCH_SIZE, tgt_model, done):
-        self.model.fit(X_train/255, y_train, batch_size= BATCH_SIZE, verbose=0,shuffle=False)
+    def Train(self, X_train, y_train, BATCH_SIZE, model,tgt_model, done):
+      
+        self.model.fit(X_train/255, y_train, batch_size= BATCH_SIZE, verbose=1,shuffle=False)
         if done:
             self.target_update_counter +=1
         if self.target_update_counter > UPDATE_TARGET_EVERY:
             print("SETTING WEIGHTS...")
-            tgt_model.model.set_weights(self.model.get_weights())
+            model.model.set_weights(tgt_model.get_weights())
             self.target_update_counter = 0
 
 

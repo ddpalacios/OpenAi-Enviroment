@@ -12,13 +12,15 @@ EPSILON_DECAY_LAST_FRAME = 10 ** 5
 MIN_REWARD = -300  # For model save
 MAX_REWARD = 300
 GAMMA = .99
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 MODEL_NAME = "DQN"
 REPLAY_SIZE = 10_000
 REPLAY_START_SIZE = 10_000
 LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 1_000
 ACTION_SPACE = 9
+target_update_counter = 0
+UPDATE_TARGET_EVERY = 5
 ###################
 # Model Layer Param
 # (FOR CONV2D)
@@ -33,8 +35,8 @@ def calc_loss(model, target_model, env, done):
         return
     batch = env.exp_buffer.sample(BATCH_SIZE)
     current_states, actions, reward, dones, next_states = batch
-    current_qs_list = forward_prop.t_pred(current_states)
-    future_qs_list = target_model.t_pred(next_states)
+    current_qs_list = model.predict(current_states)
+    future_qs_list = target_model.predict(current_states)
     X_train = []
     y_train = []
 
@@ -53,8 +55,18 @@ def calc_loss(model, target_model, env, done):
         current_qs[action] = new_q
         X_train.append(current_state)
         y_train.append(current_qs)
-    model.Train(np.array(X_train), np.array(y_train), BATCH_SIZE, target_model, done)
 
+    ##########################
+    # TRAINING & WEIGHT TRANSFER
+    ##########################
+    target_model.fit(np.array(X_train)/255, np.array(y_train), batch_size= BATCH_SIZE, verbose=1,shuffle=False)
+    if done:
+        target_update_counter +=1
+    if target_update_counter > UPDATE_TARGET_EVERY:
+        print("SETTING WEIGHTS...")
+        model.set_weights(target_model.get_weights())
+        target_update_counter = 0
+    ##########################
 
 
 if __name__ == '__main__':
@@ -63,8 +75,8 @@ if __name__ == '__main__':
     env = Environment(window_size=int(sys.argv[1]), step_size=int(sys.argv[2]), world_size=int(sys.argv[3]))
     show = int(sys.argv[4])
     state = env.reset()
-    forward_prop = model(state.shape, INPUT_N, HIDDEN_N, ACTION_SPACE)  # Forward propagation. Uses current weights and performs our linear algebra
-    back_prop = model(state.shape, INPUT_N, HIDDEN_N, ACTION_SPACE)  # For training (Calculates gradients with backpropagation)
+    forward_prop = model(state.shape, INPUT_N, HIDDEN_N, ACTION_SPACE).model  # Forward propagation. Uses current weights and performs our linear algebra
+    back_prop = model(state.shape, INPUT_N, HIDDEN_N, ACTION_SPACE).model  # For training (Calculates gradients with backpropagation)
     while True:
         frame_idx += 1
         if show:
