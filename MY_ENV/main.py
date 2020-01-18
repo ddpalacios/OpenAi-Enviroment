@@ -9,7 +9,8 @@ EPSILON_FINAL = 0.02
 total_rewards = []
 EPSILON_START = 1.0
 EPSILON_DECAY_LAST_FRAME = 10 ** 5
-MIN_REWARD = -200  # For model save
+MIN_REWARD = -300  # For model save
+MAX_REWARD = 300
 GAMMA = .99
 BATCH_SIZE = 64
 MODEL_NAME = "DQN"
@@ -77,16 +78,14 @@ if __name__ == '__main__':
 
         if reward is not None:
             total_rewards.append(reward)
-            
             average_reward = sum(total_rewards[-AGGREGATE_STATS_EVERY:])/len(total_rewards[-AGGREGATE_STATS_EVERY:])
             min_reward = min(total_rewards[-AGGREGATE_STATS_EVERY:])
             max_reward = max(total_rewards[-AGGREGATE_STATS_EVERY:])
             print("Min Reward: {}\nMax Reward: {}\nAverage Reward: {}\n Epsilon: {}".format(min_reward, max_reward, average_reward, epsilon))
             print("\n---------------------")
-            # if min_reward >= MIN_REWARD:
-            #     print("...SAVING MODEL...")
-            #     sleep(2)
-            #     forward_prop.model.save("DQN.h5")
+            if epsilon <= EPSILON_FINAL:
+                print("...SAVING MODEL...")
+                back_prop.model.save("DQN.h5")
 
 
 

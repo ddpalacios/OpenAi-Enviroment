@@ -22,10 +22,10 @@ class Environment:
         self.exp_buffer = ExperienceBuffer(REPLAY_SIZE)
         self.SIZE = world_size
         self.RETURN_IMAGES = True
-        self.MOVE_PENALTY = - 1
-        self.ENEMY_PENALTY = -300
-        self.NO_PROGRESS_PENALITY = -50
-        self.FOOD_REWARD = 300
+        self.MOVE_PENALTY = -200
+        self.ENEMY_PENALTY = -500
+        self.NO_PROGRESS_PENALITY = -500
+        self.FOOD_REWARD = 500
         self.OBSERVATION_SPACE_VALUES = (self.SIZE, self.SIZE, 3)  # 4
         self.ACTION_SPACE_SIZE = 9
         self.PLAYER_N = 1  # player key in dict

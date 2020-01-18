@@ -18,7 +18,7 @@ class model:
         self.model.add(Flatten())
         self.model.add(Dense(64))
         self.model.add(Dense(output_n, activation='linear'))
-        self.model.compile(optimizer=Adam(lr=0.001), loss='mse')
+        self.model.compile(optimizer=Adam(lr=1e-4), loss='mse')
 
     def t_pred(self, state):
         predicted = self.model.predict(state)
