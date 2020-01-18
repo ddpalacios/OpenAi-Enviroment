@@ -2,14 +2,17 @@ from Environment import Environment
 from Model import model
 import sys
 import numpy as np
+import time
 from time import sleep
 AGGREGATE_STATS_EVERY = 50
 EPSILON_FINAL = 0.02
 total_rewards = []
 EPSILON_START = 1.0
 EPSILON_DECAY_LAST_FRAME = 10 ** 5
+MIN_REWARD = -200  # For model save
 GAMMA = .99
 BATCH_SIZE = 64
+MODEL_NAME = "DQN"
 REPLAY_SIZE = 10_000
 REPLAY_START_SIZE = 10_000
 LEARNING_RATE = 1e-4
@@ -19,7 +22,7 @@ ACTION_SPACE = 9
 # Model Layer Param
 # (FOR CONV2D)
 ###################
-INPUT_N = 512
+INPUT_N = 64
 HIDDEN_N = 128
 ###################
 
@@ -74,14 +77,16 @@ if __name__ == '__main__':
 
         if reward is not None:
             total_rewards.append(reward)
-            if not episode % AGGREGATE_STATS_EVERY or episode == 1:
-                average_reward = sum(total_rewards[-AGGREGATE_STATS_EVERY:])/len(total_rewards[-AGGREGATE_STATS_EVERY:])
-                min_reward = min(total_rewards[-AGGREGATE_STATS_EVERY:])
-                max_reward = max(total_rewards[-AGGREGATE_STATS_EVERY:])
-                print("Min Reward: {}\nMax Reward: {}\nAverage Reward: {}".format(min_reward, max_reward, average_reward))
-
-
-
+            
+            average_reward = sum(total_rewards[-AGGREGATE_STATS_EVERY:])/len(total_rewards[-AGGREGATE_STATS_EVERY:])
+            min_reward = min(total_rewards[-AGGREGATE_STATS_EVERY:])
+            max_reward = max(total_rewards[-AGGREGATE_STATS_EVERY:])
+            print("Min Reward: {}\nMax Reward: {}\nAverage Reward: {}\n Epsilon: {}".format(min_reward, max_reward, average_reward, epsilon))
+            print("\n---------------------")
+            # if min_reward >= MIN_REWARD:
+            #     print("...SAVING MODEL...")
+            #     sleep(2)
+            #     forward_prop.model.save("DQN.h5")
 
 
 

@@ -22,9 +22,9 @@ class Environment:
         self.exp_buffer = ExperienceBuffer(REPLAY_SIZE)
         self.SIZE = world_size
         self.RETURN_IMAGES = True
-        self.MOVE_PENALTY = -1
+        self.MOVE_PENALTY = - 1
         self.ENEMY_PENALTY = -300
-        self.NO_PROGRESS_PENALITY = -100
+        self.NO_PROGRESS_PENALITY = -50
         self.FOOD_REWARD = 300
         self.OBSERVATION_SPACE_VALUES = (self.SIZE, self.SIZE, 3)  # 4
         self.ACTION_SPACE_SIZE = 9
@@ -50,8 +50,7 @@ class Environment:
             q_val = model.Predict(state)  # And using models current weights, perform your forward prop
             action = np.argmax(q_val)  # Then retrieve the index with its maximum value
 
-        new_state, reward, is_done = self.step(
-            action)  # Perform chosen action and return its new state, its reward, and our boolean
+        new_state, reward, is_done = self.step(action)  # Perform chosen action and return its new state, its reward, and our boolean
         self.total_reward += reward  # Add the given reward to our total reward
         new_state = new_state
 
@@ -89,7 +88,6 @@ class Environment:
             print("\nNo longer appending expierience...\n...Ready to train data with current buffer...")
         print("\n\n----------------")
         #########################################
-
     def render(self):
         img = self.get_image()
         img = img.resize((self.window_size, self.window_size))
@@ -111,14 +109,11 @@ class Environment:
         self.player.action(action)  # Perform that step to our agents class (Dont worry about how this works. \
         # Just know it will perform that specified action updating (x,y) cord)
 
-        new_observation = np.array(
-            self.get_image())  # From the current coordinates, retrieve the RGB image for our Conv2D model
+        new_observation = np.array(self.get_image())  # From the current coordinates, retrieve the RGB image for our Conv2D model
         if self.player == self.enemy:  # if the player hits the enemy
             reward = self.ENEMY_PENALTY  # add the penality to our current reward
-            print("HIT ENEMY\nReward:", reward)
         elif self.player == self.food:
             reward = self.FOOD_REWARD
-            print("OBTAINED FOOD\nReward:", reward)
             # self.food.x = np.random.randint(0, self.SIZE)
             # self.food.y = np.random.randint(0, self.SIZE)
         elif self.episode_step >= self.MAX_AMOUNT_OF_STEPS:
@@ -133,6 +128,10 @@ class Environment:
 
     def get_image(self):
         env = np.zeros((self.SIZE, self.SIZE, 3), dtype=np.uint8)  # starts an rbg of our size
+        self.food.x = 7
+        self.food.y = 1
+        self.enemy.x = 5
+        self.enemy.y = 3
         env[self.food.x][self.food.y] = self.d[self.FOOD_N]  # sets the food location tile to green color
         env[self.enemy.x][self.enemy.y] = self.d[self.ENEMY_N]  # sets the enemy location to red
         env[self.player.x][self.player.y] = self.d[self.PLAYER_N]  # sets the player tile to blue
