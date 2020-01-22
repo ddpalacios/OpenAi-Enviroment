@@ -10,7 +10,7 @@ Experience = collections.namedtuple('Experience', field_names=['state', 'action'
 
 
 class Environment:
-    def __init__(self, window_size, step_size, world_size=10, REPLAY_SIZE=10_000, title="Blob world"):
+    def __init__(self, window_size, step_size, world_size=10, REPLAY_SIZE=10000, title="Blob world"):
         self.episode_reward = 0.0  # Lets first initialize our reward to 0
         self.episode_step = 0
         self.total_reward = 0.0
@@ -22,10 +22,9 @@ class Environment:
         self.exp_buffer = ExperienceBuffer(REPLAY_SIZE)
         self.SIZE = world_size
         self.RETURN_IMAGES = True
-        self.MOVE_PENALTY = -200
-        self.ENEMY_PENALTY = -500
-        self.NO_PROGRESS_PENALITY = -500
-        self.FOOD_REWARD = 500
+        self.MOVE_PENALTY = -1
+        self.ENEMY_PENALTY = -300
+        self.FOOD_REWARD = 25
         self.OBSERVATION_SPACE_VALUES = (self.SIZE, self.SIZE, 3)  # 4
         self.ACTION_SPACE_SIZE = 9
         self.PLAYER_N = 1  # player key in dict
@@ -47,7 +46,7 @@ class Environment:
         else:
             state = self.state  # Otherwise, get its current state
             # print("... Forward prop action calculating...")
-            q_val = model.predict(np.array(state).reshape(-1, *state.shape) / 255)[0]  # And using models current weights, perform your forward prop
+            q_val = model.model.predict(np.array(state).reshape(-1, *state.shape) / 255)[0]  # And using models current weights, perform your forward prop
             action = np.argmax(q_val)  # Then retrieve the index with its maximum value
 
         new_state, reward, is_done = self.step(action)  # Perform chosen action and return its new state, its reward, and our boolean
@@ -83,7 +82,7 @@ class Environment:
                         self.state.shape, action, reward,
                         is_done, new_state.shape))
         print("REPLAY BUFFER LENGTH: {}".format(self.exp_buffer._len_()))
-        if self.exp_buffer._len_() >= 10_000:
+        if self.exp_buffer._len_() >= 10000:
             print("\nNo longer appending expierience...\n...Ready to train data with current buffer...")
         print("\n\n----------------")
         #########################################
@@ -95,7 +94,7 @@ class Environment:
 
     def step(self, action):
         '''
-        :param action --> Indicated action [1 ... 8]:
+        :param action --> Indicated action [0 ... 8]:
         :return: new_state, reward, is_done
 
         This function will allow us to interact with our enviroment with
@@ -113,10 +112,6 @@ class Environment:
             reward = self.ENEMY_PENALTY  # add the penality to our current reward
         elif self.player == self.food:
             reward = self.FOOD_REWARD
-            # self.food.x = np.random.randint(0, self.SIZE)
-            # self.food.y = np.random.randint(0, self.SIZE)
-        elif self.episode_step >= self.MAX_AMOUNT_OF_STEPS:
-            reward = self.NO_PROGRESS_PENALITY
         else:
             reward = self.MOVE_PENALTY
 
@@ -127,10 +122,6 @@ class Environment:
 
     def get_image(self):
         env = np.zeros((self.SIZE, self.SIZE, 3), dtype=np.uint8)  # starts an rbg of our size
-        self.food.x = 7
-        self.food.y = 1
-        self.enemy.x = 5
-        self.enemy.y = 3
         env[self.food.x][self.food.y] = self.d[self.FOOD_N]  # sets the food location tile to green color
         env[self.enemy.x][self.enemy.y] = self.d[self.ENEMY_N]  # sets the enemy location to red
         env[self.player.x][self.player.y] = self.d[self.PLAYER_N]  # sets the player tile to blue
