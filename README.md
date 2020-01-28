@@ -1,5 +1,5 @@
 # OpenAi-Enviroment
-Reinforcement Learning 
+An environment to understand the depths of Deep-Q Networks and their limitations 
 
 !!Check out repository for Source code from PactPublishing!!
 
